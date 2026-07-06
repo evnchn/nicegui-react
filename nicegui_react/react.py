@@ -255,17 +255,16 @@ class React(Element, component='react.js'):
     # --------------------------------------------------------------- build
 
     def _generate_unique_hash(self, component_id: str) -> str:
-        # Include everything that changes the build output (mirroring
-        # _compute_source_fingerprint), or same-directory instances with
-        # different configurations would silently share one bundle.
-        unique = '|'.join([
+        # Include the per-instance build configuration, or same-directory
+        # instances with different configurations would silently share one bundle.
+        unique = json.dumps([
             component_id,
             str(self.original_project_path),
             str(self.main_component),
-            json.dumps(self.env, sort_keys=True, default=str),
-            'dev' if self.dev else 'prod',
-            'legacy-peer-deps' if self.use_legacy_peer_deps else '',
-        ])
+            self.env,
+            self.dev,
+            self.use_legacy_peer_deps,
+        ], sort_keys=True, default=str)
         return 'react_' + hashlib.md5(unique.encode()).hexdigest()
 
     def _ensure_built(self) -> Dict[str, Any]:
