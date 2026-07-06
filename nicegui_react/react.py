@@ -88,7 +88,7 @@ class React(Element, component='react.js'):
     _dev_watchers: Dict[str, 'React._DevWatcher'] = {}
     # Dev-mode build roots (resolved project dir -> component hash). Dev builds
     # happen in place, sharing one entry/config/output per directory, so a
-    # project directory supports only one configuration at a time (see issue #9).
+    # project directory supports only one configuration at a time.
     _dev_build_roots: Dict[Path, str] = {}
 
     def __init__(
@@ -191,16 +191,16 @@ class React(Element, component='react.js'):
             self.build_root = self.original_project_path
             # In-place builds share one entry/config/output per directory, so a
             # second configuration would silently overwrite the first's bundle.
-            # Fail loudly instead (interim guard; see issue #9 for per-config
-            # dev builds). The same configuration (same hash) stays allowed --
-            # that is the existing shared-watcher multi-instance path.
+            # Fail loudly instead (interim guard until dev builds are per-config).
+            # The same configuration (same hash) stays allowed -- that is the
+            # existing shared-watcher multi-instance path.
             registered = React._dev_build_roots.get(self.build_root)
             if registered is not None and registered != self.component_hash:
                 raise RuntimeError(
                     'nicegui-react: dev=True builds in place, so each project directory supports '
                     'only one configuration (main_component/env/flags) at a time. A different '
                     f'configuration is already active for {self.build_root}. Use dev=False for '
-                    'additional variants, or duplicate the project directory. See issue #9.'
+                    'additional variants, or duplicate the project directory.'
                 )
             React._dev_build_roots[self.build_root] = self.component_hash
         else:
