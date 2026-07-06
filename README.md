@@ -1,6 +1,16 @@
 # NiceGUI React Integration
 
+[![PyPI version](https://img.shields.io/pypi/v/nicegui-react.svg)](https://pypi.org/project/nicegui-react/)
+[![Python versions](https://img.shields.io/pypi/pyversions/nicegui-react.svg)](https://pypi.org/project/nicegui-react/)
+[![Downloads](https://static.pepy.tech/badge/nicegui-react/month)](https://pepy.tech/project/nicegui-react)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/puntorigen/nicegui-react/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/puntorigen/nicegui-react.svg?style=flat&label=stars)](https://github.com/puntorigen/nicegui-react)
+
 Embed and interact with **React** components from **NiceGUI**, in Python.
+
+![Live dashboard demo — a React recharts component whose data is streamed from Python](https://raw.githubusercontent.com/puntorigen/nicegui-react/main/assets/demo.gif)
+
+<sub>Everything above is a single NiceGUI page. The chart and list on the right are a React component (built on [recharts](https://recharts.org/)); the controls on the left are plain Python (NiceGUI). Moving a Python control updates the React chart instantly, live data streams in through a `ui.timer`, and adding/removing a metric sends an event back to Python — see the [complex example](examples/complex_app.py).</sub>
 
 `nicegui-react` builds your React project with [Vite](https://vitejs.dev/), serves the
 compiled bundle as a static asset, and mounts it inside a native NiceGUI component. Props
