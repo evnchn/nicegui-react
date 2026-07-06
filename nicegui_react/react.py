@@ -527,14 +527,36 @@ class React(Element, component='react.js'):
         )
         if not needs_install:
             return
-        command = ['npm', 'install']
+        # Resolve via PATH/PATHEXT instead of passing a bare name to subprocess:
+        # on Windows npm is a `npm.cmd` shim and CreateProcess will not find it
+        # from 'npm' alone (no shell involved), raising a bare FileNotFoundError.
+        npm = shutil.which('npm')
+        if npm is None:
+            raise RuntimeError(
+                'nicegui-react: could not find "npm" on PATH. Install Node.js '
+                '(https://nodejs.org/) and ensure npm is available before using React components.'
+            )
+        command = [npm, 'install']
         if self.use_legacy_peer_deps:
             command.append('--legacy-peer-deps')
         subprocess.run(command, cwd=self.build_root, check=True)
 
     def _vite_command(self, *extra: str) -> List[str]:
-        local_vite = self.build_root / 'node_modules' / '.bin' / 'vite'
-        base = [str(local_vite)] if local_vite.exists() else ['npx', 'vite']
+        # On Windows, node_modules/.bin/vite is an extensionless POSIX shell shim
+        # that CreateProcess cannot execute directly; the runnable entry point
+        # there is vite.cmd. POSIX keeps the plain shim.
+        bin_name = 'vite.cmd' if sys.platform == 'win32' else 'vite'
+        local_vite = self.build_root / 'node_modules' / '.bin' / bin_name
+        if local_vite.exists():
+            base = [str(local_vite)]
+        else:
+            npx = shutil.which('npx')
+            if npx is None:
+                raise RuntimeError(
+                    'nicegui-react: could not find "npx" on PATH. Install Node.js '
+                    '(https://nodejs.org/) and ensure npm is available before using React components.'
+                )
+            base = [npx, 'vite']
         return base + ['build', '--config', _CONFIG_FILENAME, *extra]
 
     def _run_build(self) -> None:
