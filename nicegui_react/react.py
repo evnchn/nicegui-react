@@ -86,9 +86,7 @@ class React(Element, component='react.js'):
     _static_mounts: set = set()
     # Dev watchers, keyed by component hash.
     _dev_watchers: Dict[str, 'React._DevWatcher'] = {}
-    # Dev-mode build roots (resolved project dir -> component hash). Dev builds
-    # happen in place, sharing one entry/config/output per directory, so a
-    # project directory supports only one configuration at a time.
+    # Dev-mode build roots (project dir -> hash); in-place builds support one configuration per directory.
     _dev_build_roots: Dict[Path, str] = {}
 
     def __init__(
@@ -189,11 +187,8 @@ class React(Element, component='react.js'):
             # reloads. Generated files use distinct names to avoid clobbering
             # any existing vite.config.js / main.jsx in the user's project.
             self.build_root = self.original_project_path
-            # In-place builds share one entry/config/output per directory, so a
-            # second configuration would silently overwrite the first's bundle.
-            # Fail loudly instead (interim guard until dev builds are per-config).
-            # The same configuration (same hash) stays allowed -- that is the
-            # existing shared-watcher multi-instance path.
+            # A second configuration would silently overwrite this directory's single
+            # entry/config/bundle -- fail loudly; same-hash instances share the watcher.
             registered = React._dev_build_roots.get(self.build_root)
             if registered is not None and registered != self.component_hash:
                 raise RuntimeError(
@@ -260,12 +255,9 @@ class React(Element, component='react.js'):
     # --------------------------------------------------------------- build
 
     def _generate_unique_hash(self, component_id: str) -> str:
-        # The key must include everything that changes the build output
-        # (mirroring :meth:`_compute_source_fingerprint`). Otherwise two
-        # instances sharing a project directory but differing in e.g.
-        # ``main_component`` would collide on one cache key, and the
-        # in-process bundle registry would silently serve the first
-        # instance's bundle for the second.
+        # Include everything that changes the build output (mirroring
+        # _compute_source_fingerprint), or same-directory instances with
+        # different configurations would silently share one bundle.
         unique = '|'.join([
             component_id,
             str(self.original_project_path),
