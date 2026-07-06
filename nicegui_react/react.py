@@ -242,7 +242,20 @@ class React(Element, component='react.js'):
     # --------------------------------------------------------------- build
 
     def _generate_unique_hash(self, component_id: str) -> str:
-        unique = component_id + str(self.original_project_path)
+        # The key must include everything that changes the build output
+        # (mirroring :meth:`_compute_source_fingerprint`). Otherwise two
+        # instances sharing a project directory but differing in e.g.
+        # ``main_component`` would collide on one cache key, and the
+        # in-process bundle registry would silently serve the first
+        # instance's bundle for the second.
+        unique = '|'.join([
+            component_id,
+            str(self.original_project_path),
+            str(self.main_component),
+            json.dumps(self.env, sort_keys=True, default=str),
+            'dev' if self.dev else 'prod',
+            'legacy-peer-deps' if self.use_legacy_peer_deps else '',
+        ])
         return 'react_' + hashlib.md5(unique.encode()).hexdigest()
 
     def _ensure_built(self) -> Dict[str, Any]:
