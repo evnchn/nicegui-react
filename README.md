@@ -153,8 +153,15 @@ components and instances can coexist on one page.
   If it is missing or incomplete, `nicegui-react` will fill in sensible defaults and run
   `npm install` for you.
 
-See the [`examples/`](examples/) folder for a complete demo with two different React components,
-multiple instances, timer-driven props, and events.
+See the [`examples/`](examples/) folder for complete demos:
+
+- [`app.py`](examples/app.py) - two different React components (a counter and a clock), multiple
+  instances of each on one page, timer-driven props, and events.
+- [`complex_app.py`](examples/complex_app.py) - a live dashboard built on the third-party
+  [`recharts`](https://recharts.org/) library, showing that arbitrary npm dependencies are bundled
+  automatically. It streams array data from a `ui.timer` into a chart, keeps React-internal state
+  (a controlled input) alongside Python-driven props, handles multiple events with different
+  payloads, and uses an `async` Python event handler.
 
 ## Upgrading from 0.1.x
 
